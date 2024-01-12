@@ -105,6 +105,14 @@ bool loadParams(const py::dict& kwargs) {
         db::setting.numThreads = kwargs["num_threads"].cast<int>();
     }
 
+    //new
+    if(kwargs.contains("cap")){
+        db::setting.CapFile = kwargs["cap"].cast<std::string>();
+    }
+    if(kwargs.contains("net")){
+        db::setting.NetFile = kwargs["net"].cast<std::string>();
+    }
+
     return true;
 }
 

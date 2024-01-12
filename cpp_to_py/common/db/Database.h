@@ -29,6 +29,7 @@ class PowerNet;
 class EdgeTypes;
 class GCellGrid;
 class BsRouteInfo;
+class CapInfo; //new, CapFile info
 }  // namespace db
 
 #include "Cell.h"
@@ -45,6 +46,7 @@ class BsRouteInfo;
 #include "SNet.h"
 #include "Via.h"
 #include "BsRouteInfo.h"
+#include "CapInfo.h"
 
 namespace db {
 
@@ -99,6 +101,8 @@ public:
     vector<Rectangle> placeBlockages;
 
     PowerNet powerNet;
+    //new
+    std::map<std::string, std::vector<std::vector<std::tuple<int, int, int>>>> nets_plain;
 
 private:
     static const size_t _bufferCapacity = 128 * 1024;
@@ -216,6 +220,8 @@ public:
 public:
     bool readLEF(const std::string& file);
     bool readDEF(const std::string& file);
+    bool readCap(const std::string& file);
+    bool readNet(const std::string& file);
     bool readDEFPG(const string& file);
     bool writeDEF(const std::string& file);
     bool writeICCAD2017(const string& inputDef, const string& outputDef);

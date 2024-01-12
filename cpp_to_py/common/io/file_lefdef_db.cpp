@@ -9,6 +9,64 @@
 
 using namespace db;
 
+bool Database::readCap(const std::string& file){
+    std::ifstream inputFile(file);
+    if (!inputFile.is_open()) {
+        std::cerr << "Error opening the file." << std::endl;
+        return 0;
+    }
+
+    // Read each line from the file
+    std::string line;
+    
+    return 0;
+}
+
+bool Database::readNet(const std::string& file){ //new
+    
+    std::ifstream inputFile(file);
+    if (!inputFile.is_open()) {
+        std::cerr << "Error opening the file." << std::endl;
+        return 0;
+    }
+
+    // Read each line from the file
+    std::string line;
+    std::string currentKey;
+
+    while (std::getline(inputFile, line)) {
+        currentKey = line; // first line should be the key
+        std::vector<std::vector<std::tuple<int, int, int>>> tuples;
+        std::getline(inputFile, line); // consumes the "("
+        while (std::getline(inputFile, line)) {
+            std::vector<std::tuple<int, int, int>> temp;
+            if(line == ")") break;
+            else{
+                // Remove square brackets
+                line.erase(std::remove(line.begin(), line.end(), '['), line.end());
+                line.erase(std::remove(line.begin(), line.end(), ']'), line.end());
+                std::istringstream iss(line);
+                char comma; // To handle commas between tuple elements
+
+                while (!iss.eof()) {
+                    int first, second, third;
+                    iss.ignore(1, '(');
+                    iss >> first >> std::ws >> comma >> std::ws >> second >> std::ws >> comma >> std::ws >> third;
+                    iss.ignore(1, ')');
+                    iss >> comma >> std::ws;
+                    temp.emplace_back(std::tuple<int, int, int>(first, second, third));
+                    // std::cout << first << " " << second << " " << third << std::endl;
+                }
+            }
+            tuples.emplace_back(temp);
+        }
+        nets_plain[currentKey] = tuples;
+    }
+    cout << "nets_plain size: " << nets_plain.size() << endl;
+    // inputFile.close();
+    return true;
+}
+
 bool isFlipX(int orient) {
     switch (orient) {
         case 0:

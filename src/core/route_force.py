@@ -93,7 +93,7 @@ def evaluate_routability(args, logger, cg_mapHV: torch.Tensor):
 
     return ace_list, selected_rc
 
-def calc_gr_wl_via(grdb, routeforce):
+def calc_gr_wl_via(grdb, routeforce): # use for computing wirelength and via count
     step_x, step_y = routeforce.gcell_steps()
     layer_pitch = routeforce.layer_pitch()
     layer_m2_pitch = layer_pitch[1] if len(layer_pitch) > 1 else layer_pitch[0]
@@ -103,7 +103,7 @@ def calc_gr_wl_via(grdb, routeforce):
     
     return gr_wirelength, gr_numVias
 
-def estimate_num_shorts(routeforce, gpdb, cap_map, wire_dmd_map, via_dmd_map):
+def estimate_num_shorts(routeforce, gpdb, cap_map, wire_dmd_map, via_dmd_map): # use for computing number of shorts
     step_x, step_y = routeforce.gcell_steps()
     layer_width = routeforce.layer_width()
     layer_pitch = routeforce.layer_pitch()
@@ -127,7 +127,7 @@ def estimate_num_shorts(routeforce, gpdb, cap_map, wire_dmd_map, via_dmd_map):
     return (routedShortArea + routedShortViaNum).item()
 
 
-def get_fft_scale(num_bin_x, num_bin_y, device, scale_w_k=True):
+def get_fft_scale(num_bin_x, num_bin_y, device, scale_w_k=True): # fft stands for fast fourier transform
     w_j = (
         torch.arange(num_bin_x, device=device)
         .float()

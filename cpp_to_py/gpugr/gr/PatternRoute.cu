@@ -821,7 +821,8 @@ __global__ void cudaPatternRouteParallel(int *map,
             }
         }
         if (minTotalDist == INF || minTotalDist < 0) {
-            printf("failed\n");
+            // printf("failed\n");
+            printf("failed");
             routes[0] = -1;
             // printf("routes[0] = %d\n", points[-2]);
             // return;

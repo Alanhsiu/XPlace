@@ -40,6 +40,18 @@ void Database::load() {
         readDEFPG(setting.DefFile);
     }
 
+    //new
+    if(setting.CapFile != ""){
+        std::cout << setting.CapFile << std::endl;
+        readCap(setting.CapFile);
+    }
+    if(setting.NetFile != ""){
+        std::cout << setting.NetFile << std::endl;
+        readNet(setting.NetFile);
+    }
+    std::cout << "read cap and net file done" << std::endl;
+
+
     if (setting.Size != "") {
         readSize(setting.Size);
     }

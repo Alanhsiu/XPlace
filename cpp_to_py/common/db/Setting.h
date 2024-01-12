@@ -34,6 +34,10 @@ public:
 
     std::string OutputFile = "";
 
+    //new
+    std::string CapFile = "";
+    std::string NetFile = "";
+
     void reset();
 };
 

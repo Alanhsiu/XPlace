@@ -2,7 +2,9 @@
 
 namespace gr {
 
-GRDatabase::~GRDatabase() { logger.info("destruct grdb"); }
+GRDatabase::~GRDatabase() {
+    logger.info("destruct grdb");
+}
 
 GRDatabase::GRDatabase(std::shared_ptr<db::Database> rawdb_, std::shared_ptr<gp::GPDatabase> gpdb_)
     : rawdb(*rawdb_), gpdb(*gpdb_) {
@@ -327,7 +329,8 @@ void GRDatabase::addCellObs(std::vector<RectOnLayer>& allObs, db::Cell* cell) {
     int dy = ctype->originY() + cell->ly();
     // Macro Obs
     for (auto& e : ctype->obs()) {
-        if (e.layer.rIndex == 0) continue;  // ignore M1 OBS
+        if (e.layer.rIndex == 0)
+            continue;  // ignore M1 OBS
         int lx = e.lx, ly = e.ly, hx = e.hx, hy = e.hy;
         switch (cellOrient) {
             case 2:  // S
@@ -352,7 +355,8 @@ void GRDatabase::addCellObs(std::vector<RectOnLayer>& allObs, db::Cell* cell) {
     // Pin Box
     for (auto pintype : ctype->pins) {
         for (auto& e : pintype->shapes) {
-            if (e.layer.rIndex == 0) continue;  // ignore M1 OBS
+            if (e.layer.rIndex == 0)
+                continue;  // ignore M1 OBS
             int lx = e.lx, ly = e.ly, hx = e.hx, hy = e.hy;
             switch (cellOrient) {
                 case 2:  // S
@@ -413,19 +417,25 @@ tuple<int, int, int, int> GRDatabase::getOrientOffset(int orient, int lx, int ly
 }
 
 int GRDatabase::encodeId(int l, int x, int y) {
-    if (!(l & 1) ^ m1direction) std::swap(x, y);
+    if (!(l & 1) ^ m1direction)
+        std::swap(x, y);
     return l * nMaxGrid * nMaxGrid + x * nMaxGrid + y;
 }
 
-int GRDatabase::getEOLSpace(int width, int l) { return (width < maxEOLWidthVec[l]) ? maxEOLSpacingVec[l] : 0; }
+int GRDatabase::getEOLSpace(int width, int l) {
+    return (width < maxEOLWidthVec[l]) ? maxEOLSpacingVec[l] : 0;
+}
 
 int GRDatabase::getParallelRunSpace(int l, int width, int length) {
     auto rLayer = rawdb.getRLayer(l);
-    if (rLayer->parWidth.size() == 0) return 0;  // TODO: default values ?
+    if (rLayer->parWidth.size() == 0)
+        return 0;  // TODO: default values ?
     int iWidth = rLayer->parWidth.size() - 1;
-    while (iWidth > 0 && rLayer->parWidth[iWidth] >= width) iWidth--;
+    while (iWidth > 0 && rLayer->parWidth[iWidth] >= width)
+        iWidth--;
     int iLength = rLayer->parLength.size() - 1;
-    while (iLength > 0 && rLayer->parLength[iLength] >= length) iLength--;
+    while (iLength > 0 && rLayer->parLength[iLength] >= length)
+        iLength--;
     return rLayer->parWidthSpace[iWidth][iLength];
 }
 
@@ -449,10 +459,13 @@ utils::PointT<int> GRDatabase::getObsMargin(RectOnLayer box, AggrParaRunSpace ag
 utils::IntervalT<int> GRDatabase::rangeSearchTracks(const utils::IntervalT<int>& locRange, int layerIdx) {
     auto& t = tracks[layerIdx];
     int lpos = locRange.low / layerPitch[layerIdx];
-    while (lpos + 1 < t.size() && t[lpos] < locRange.low) lpos++;
-    while (lpos > 0 && t[lpos - 1] >= locRange.low) lpos--;
+    while (lpos + 1 < t.size() && t[lpos] < locRange.low)
+        lpos++;
+    while (lpos > 0 && t[lpos - 1] >= locRange.low)
+        lpos--;
     int hpos = locRange.high / layerPitch[layerIdx];
-    while (hpos > 0 && t[hpos] > locRange.high) hpos--;
+    while (hpos > 0 && t[hpos] > locRange.high)
+        hpos--;
     return utils::IntervalT<int>(lpos, hpos);
 }
 
@@ -470,7 +483,8 @@ void GRDatabase::markObs(std::vector<RectOnLayer>& allObs,
     vector<vector<int>> layerToObjIdx(nLayers);
     for (unsigned i = 0; i < allObs.size(); i++) {
         int l = allObs[i].layer;
-        if (l < obsStartLayer) continue;
+        if (l < obsStartLayer)
+            continue;
         layerToObjIdx[allObs[i].layer].push_back(i);
     }
     for (int l = obsStartLayer; l < nLayers; l++) {
@@ -481,8 +495,10 @@ void GRDatabase::markObs(std::vector<RectOnLayer>& allObs,
 
         auto searchLowerBoundTrack = [&](int p) {
             int pos = p / layerPitch[l];
-            while (pos + 1 < t.size() && t[pos] < p) pos++;
-            while (pos && t[pos - 1] >= p) pos--;
+            while (pos + 1 < t.size() && t[pos] < p)
+                pos++;
+            while (pos && t[pos - 1] >= p)
+                pos--;
             return pos;
         };
 
@@ -540,7 +556,8 @@ void GRDatabase::markObs(std::vector<RectOnLayer>& allObs,
             utils::BoxT<int> grBox(xmin, ymin, xmax, ymax);
 
             utils::IntervalT<int> trackIntvl = rangeSearchTracks(obsBox[1 - dir], l);
-            if (!trackIntvl.IsValid()) continue;
+            if (!trackIntvl.IsValid())
+                continue;
 
             int jmin = max(grBox[dir].low - 1, 0);
             int jmax = min(grBox[dir].high, (dir == 0 ? xSize : ySize) - 2);
@@ -562,7 +579,8 @@ void GRDatabase::markObs(std::vector<RectOnLayer>& allObs,
 
         for (int i = 0; i < markingBufferLUT.size(); i++) {
             for (int j = 0; j < markingBufferLUT[i].size(); j++) {
-                if (markingBufferLUT[i][j].size() == 0) continue;
+                if (markingBufferLUT[i][j].size() == 0)
+                    continue;
                 const auto& buf = markingBufferLUT[i][j];
                 utils::IntervalT<int> gridTrackIntvl;
                 gridTrackIntvl.low = searchLowerBoundTrack(gridlines[1 - dir][i]);
@@ -599,7 +617,8 @@ void GRDatabase::markObsBookShelf(std::vector<RectOnLayer>& allObs,
     vector<vector<int>> layerToObjIdx(nLayers);
     for (unsigned i = 0; i < allObs.size(); i++) {
         int l = allObs[i].layer;
-        if (l < obsStartLayer) continue;
+        if (l < obsStartLayer)
+            continue;
         layerToObjIdx[allObs[i].layer].push_back(i);
     }
 
@@ -647,8 +666,10 @@ void GRDatabase::markObsBookShelf(std::vector<RectOnLayer>& allObs,
             for (int i = grBox[1 - dir].low; i <= grBox[1 - dir].high; i++) {
                 utils::IntervalT<int> gridIntvl(gridlines[1 - dir][i], gridlines[1 - dir][i + 1]);
                 utils::IntervalT<int> blockedIntvl = gridIntvl.IntersectWith(obsBox[1 - dir]);
-                if (!blockedIntvl.IsValid()) continue;
-                if (blockedIntvl.range() == 0) continue;
+                if (!blockedIntvl.IsValid())
+                    continue;
+                if (blockedIntvl.range() == 0)
+                    continue;
                 for (int j = jmin; j <= jmax; j++) {
                     int edgePos = gridlines[dir][j + 1];
                     if (obsBox[dir].Contain(edgePos)) {
@@ -659,7 +680,8 @@ void GRDatabase::markObsBookShelf(std::vector<RectOnLayer>& allObs,
         }
         for (int i = 0; i < markingBufferLUT.size(); i++) {
             for (int j = 0; j < markingBufferLUT[i].size(); j++) {
-                if (markingBufferLUT[i][j].size() == 0) continue;
+                if (markingBufferLUT[i][j].size() == 0)
+                    continue;
                 utils::IntervalT<int> gridIntvl(gridlines[1 - dir][i], gridlines[1 - dir][i + 1]);
                 vector<utils::IntervalT<int>>& buf = markingBufferLUT[i][j];
                 int ovlpLen = 0;
@@ -709,11 +731,13 @@ void GRDatabase::markObsBookShelf(std::vector<RectOnLayer>& allObs,
     }
 }
 
-void GRDatabase::setupGrNets() {
-    grNets.resize(rawdb.nets.size());
+void GRDatabase::setupGrNets() { // Alan: net -> pin -> access points
+    // grNets.resize(rawdb.nets.size()); // Alan: use rawdb.nets_plain.size()
+    grNets.resize(rawdb.nets_plain.size());
     int tempcnt = 0, tempcnt2 = 0;
     auto thread_func = [&](int threadIdx) {
-        for (int netId = threadIdx; netId < rawdb.nets.size(); netId += db::setting.numThreads) {
+        // for (int netId = threadIdx; netId < rawdb.nets.size(); netId += db::setting.numThreads) {
+        for (int netId = threadIdx; netId < rawdb.nets_plain.size(); netId += db::setting.numThreads) {
             db::Net* rawdbNet = rawdb.nets[netId];
             std::vector<std::vector<std::tuple<int, int, int>>> pinAccessPoints(rawdbNet->pins.size());
             for (size_t pinIdx = 0; pinIdx < rawdbNet->pins.size(); pinIdx++) {
@@ -812,7 +836,8 @@ void GRDatabase::setupGrNets() {
                     for (int x = xmin; x <= xmax; x++) {
                         for (int y = ymin; y <= ymax; y++) {
                             auto t = std::make_tuple(elayer, x, y);
-                            if (vis.find(t) != vis.end()) continue;
+                            if (vis.find(t) != vis.end())
+                                continue;
                             vis.insert(t);
                             pinAccessPoints[pinIdx].emplace_back(t);
                         }
@@ -981,22 +1006,29 @@ void GRDatabase::writeGuides(std::string outputFile) {
             s[cur++] = '0';
         else {
             int len = 0;
-            while (num) temp[len++] = num % 10, num /= 10;
-            for (int i = len - 1; i >= 0; i--) s[cur++] = temp[i] + '0';
+            while (num)
+                temp[len++] = num % 10, num /= 10;
+            for (int i = len - 1; i >= 0; i--)
+                s[cur++] = temp[i] + '0';
         }
     };
-    auto singleGuide = [&](int xmin, int xmax, int ymin, int ymax, int layer) {
+
+    auto singleGuide = [&](int xmin, int ymin, int layer1, int xmax, int ymax, int layer2) {
         number(gridlines[0][xmin]);
         s[cur++] = ' ';
         number(gridlines[1][ymin]);
         s[cur++] = ' ';
-        number(gridlines[0][xmax + 1]);
+        number(layer1);
         s[cur++] = ' ';
-        number(gridlines[1][ymax + 1]);
+        number(gridlines[0][xmax]);
         s[cur++] = ' ';
-        for (auto e : rlayerNames[layer]) {
-            s[cur++] = e;
-        }
+        number(gridlines[1][ymax]);
+        s[cur++] = ' ';
+        number(layer2);
+        s[cur++] = ' ';
+        // for (auto e : rlayerNames[layer]) {
+        //     s[cur++] = e;
+        // }
         s[cur++] = '\n';
     };
 
@@ -1005,7 +1037,8 @@ void GRDatabase::writeGuides(std::string outputFile) {
         for (size_t i = 0; i < wires.size(); i += 2) {
             int p = wires[i];
             int l = p / nMaxGrid / nMaxGrid, x = p % (nMaxGrid * nMaxGrid) / nMaxGrid, y = p % nMaxGrid;
-            if (!(l & 1) ^ m1direction) std::swap(x, y);
+            if (!(l & 1) ^ m1direction)
+                std::swap(x, y);
             int xmin = x, xmax = x, ymin = y, ymax = y;
             if ((l & 1) ^ m1direction) {
                 ymax += wires[i + 1];
@@ -1017,28 +1050,34 @@ void GRDatabase::writeGuides(std::string outputFile) {
                 logger.error("Net %d OUT OF BOUNDARY", netId);
                 exit(0);
             }
-            singleGuide(xmin, xmax, ymin, ymax, l);
+            singleGuide(xmin, ymin, l, xmax, ymax, l);
         }
         auto vias = grNets[netId].getVias();
         for (auto p : vias) {
             int l = p / nMaxGrid / nMaxGrid, x = p % (nMaxGrid * nMaxGrid) / nMaxGrid, y = p % nMaxGrid;
-            if (!(l & 1) ^ m1direction) std::swap(x, y);
-            singleGuide(x, x, y, y, l);
-            singleGuide(x, x, y, y, l + 1);
-            if (l + 2 < nLayers) singleGuide(x, x, y, y, l + 2);
+            if (!(l & 1) ^ m1direction)
+                std::swap(x, y);
+            // singleGuide(x, x, y, y, l);
+            // singleGuide(x, x, y, y, l + 1);
+            // if (l + 2 < nLayers)
+            //     singleGuide(x, x, y, y, l + 2);
+            singleGuide(x, y, l, x, y, l+1);
         }
-        auto pins = grNets[netId].getPins();
-        for (auto& temp : pins)
-            for (auto& p : temp) {
-                int l = p / nMaxGrid / nMaxGrid, x = p % (nMaxGrid * nMaxGrid) / nMaxGrid, y = p % nMaxGrid;
-                if (!(l & 1) ^ m1direction) std::swap(x, y);
-                // int  xmin = x, xmax = x, ymin = y, ymax = y;
-                int lmin = max(0, l - 2), lmax = min(nLayers - 1, l + 2);
-                int xmin = max(0, x - 1), xmax = min(xSize - 1, x + 1);
-                int ymin = max(0, y - 1), ymax = min(ySize - 1, y + 1);
-                for (int i = lmin; i <= lmax; i++) singleGuide(xmin, xmax, ymin, ymax, i);
-            }
+        // auto pins = grNets[netId].getPins();
+        // for (auto& temp : pins)
+        //     for (auto& p : temp) {
+        //         int l = p / nMaxGrid / nMaxGrid, x = p % (nMaxGrid * nMaxGrid) / nMaxGrid, y = p % nMaxGrid;
+        //         if (!(l & 1) ^ m1direction)
+        //             std::swap(x, y);
+        //         // int  xmin = x, xmax = x, ymin = y, ymax = y;
+        //         int lmin = max(0, l - 2), lmax = min(nLayers - 1, l + 2);
+        //         int xmin = max(0, x - 1), xmax = min(xSize - 1, x + 1);
+        //         int ymin = max(0, y - 1), ymax = min(ySize - 1, y + 1);
+        //         for (int i = lmin; i <= lmax; i++)
+        //             singleGuide(xmin, ymin, i, xmax, ymax, i);
+        //     }
     };
+
     for (int netId = 0; netId < grNets.size(); netId++) {
         int rawdbNetId = gpdb.getNets()[netId].getOriDBId();
         for (auto e : rawdb.nets[rawdbNetId]->name) {
@@ -1059,6 +1098,7 @@ void GRDatabase::writeGuides(std::string outputFile) {
             exit(0);
         }
     }
+
     fwrite(s, sizeof(char), cur, file);
     fclose(file);
 }
